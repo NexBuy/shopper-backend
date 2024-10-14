@@ -3,9 +3,7 @@ package com.project.shopper.service;
 import com.project.shopper.model.Inventory;
 import com.project.shopper.model.InventoryReq;
 import com.project.shopper.model.Product;
-import com.project.shopper.model.ProductCategory;
 import com.project.shopper.repository.InventoryRepository;
-import com.project.shopper.repository.ProductCategoryRepository;
 import com.project.shopper.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,8 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    @Autowired
-    private ProductCategoryRepository categoryRepository;
+//    @Autowired
+//    private ProductCategoryRepository categoryRepository;
 
     @Autowired
     private InventoryRepository inventoryRepository;
@@ -38,16 +36,21 @@ public class ProductService {
         return inventoryRepository.findProductExist(productID)== null;
     }
 
+    public Product checkProductExist(Long productId){
+        Optional<Product> productEnt = productRepository.findById(productId);
+        return productEnt.orElse(null);
+    }
+
     public Inventory addToInventory(InventoryReq inventoryReq) {
-        Optional<Product> product = productRepository.findById(inventoryReq.getProductId());
-        if (checkProductInventoryExists(product.get().getProductId())) {
+        Product product = checkProductExist(inventoryReq.getProductId());
+        if(product!=null){
+        if (checkProductInventoryExists(product.getProductId())) {
             if(inventoryReq.getStock()<=0){return null;}
-            Inventory inventory = new Inventory(product.get(), inventoryReq.getStock());
+            Inventory inventory = new Inventory(product, inventoryReq.getStock());
             return inventoryRepository.save(inventory);
         }
-        else{
-            return null;
         }
+        return null;
     }
 
     public List<Inventory> getAllInventory() {
@@ -64,14 +67,15 @@ public class ProductService {
     }
 
     public Inventory updateInventory(InventoryReq inventoryReq) {
-        Optional<Product> product = productRepository.findById(inventoryReq.getProductId());
-        if (!checkProductInventoryExists(product.get().getProductId())) {
+        Product product = checkProductExist(inventoryReq.getProductId());
+        if(product!=null){
+        if (!checkProductInventoryExists(product.getProductId())) {
             if(inventoryReq.getStock()<=0){return null;}
-            Inventory inventory = inventoryRepository.findProductExist(product.get().getProductId());
+            Inventory inventory = inventoryRepository.findProductExist(product.getProductId());
             inventory.setQuantity(inventoryReq.getStock());
             return inventoryRepository.save(inventory);
-        }else{
-            return null;
         }
+        }
+        return null;
     }
 }

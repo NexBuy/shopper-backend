@@ -32,12 +32,12 @@ public class ProductController {
     }
 
     @GetMapping("/inventory")
-    public List<Inventory> getInventoryforAll(){
+    public List<Inventory> getInventoryForAll(){
         return productService.getAllInventory();
     }
 
     @GetMapping("/inventory/{prodId}")
-    public Inventory getInventoryforProduct(@PathVariable Long prodId){
+    public Inventory getInventoryForProduct(@PathVariable Long prodId){
         return productService.getInventoryForProduct(prodId);
     }
 
