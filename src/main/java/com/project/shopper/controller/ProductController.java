@@ -31,4 +31,15 @@ public class ProductController {
         return productService.addToInventory(inventoryReq);
     }
 
+    @GetMapping("/inventory")
+    public List<Inventory> getInventoryforAll(){
+        return productService.getAllInventory();
+    }
+
+    @GetMapping("/inventory/{prodId}")
+    public Inventory getInventoryforProduct(@PathVariable Long prodId){
+        return productService.getInventoryForProduct(prodId);
+    }
+
+
 }
