@@ -41,6 +41,7 @@ public class ProductService {
     public Inventory addToInventory(InventoryReq inventoryReq) {
         Optional<Product> product = productRepository.findById(inventoryReq.getProductId());
         if (checkProductInventoryExists(product.get().getProductId())) {
+            if(inventoryReq.getStock()<=0){return null;}
             Inventory inventory = new Inventory(product.get(), inventoryReq.getStock());
             return inventoryRepository.save(inventory);
         }
@@ -57,6 +58,18 @@ public class ProductService {
         Optional<Product> product = productRepository.findById(prodId);
         if(product.isPresent()) {
             return inventoryRepository.findProductExist(prodId);
+        }else{
+            return null;
+        }
+    }
+
+    public Inventory updateInventory(InventoryReq inventoryReq) {
+        Optional<Product> product = productRepository.findById(inventoryReq.getProductId());
+        if (!checkProductInventoryExists(product.get().getProductId())) {
+            if(inventoryReq.getStock()<=0){return null;}
+            Inventory inventory = inventoryRepository.findProductExist(product.get().getProductId());
+            inventory.setQuantity(inventoryReq.getStock());
+            return inventoryRepository.save(inventory);
         }else{
             return null;
         }

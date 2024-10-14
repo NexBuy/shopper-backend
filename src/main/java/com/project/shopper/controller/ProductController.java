@@ -41,5 +41,10 @@ public class ProductController {
         return productService.getInventoryForProduct(prodId);
     }
 
+    @PutMapping("/inventory")
+    public Inventory updateInventory(@RequestBody InventoryReq inventoryReq){
+        return productService.updateInventory(inventoryReq);
+    }
+
 
 }
