@@ -3,4 +3,4 @@ ___
 
 Endpoints for user, product and inventory are created.
 
-Still under development.
+Still under development!
