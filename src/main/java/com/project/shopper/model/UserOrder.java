@@ -27,7 +27,7 @@ public class UserOrder {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private ProductUser prodcutUser;
+    private ProductUser productUser;
 
     private LocalDateTime orderDate;
     private String status;
