@@ -6,6 +6,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -24,6 +28,13 @@ public class Inventory {
     private Product product;
 
     private int quantity;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(insertable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public Inventory(Product product, int quantity) {
         this.product = product;
