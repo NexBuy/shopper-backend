@@ -3,6 +3,9 @@ package com.project.shopper.model;
 
 public class InventoryReq {
 
+
+
+    private Long InventoryId;
     private Long ProductId;
     private int stock;
 
@@ -21,4 +24,12 @@ public class InventoryReq {
     public void setStock(int stock) {
         this.stock = stock;
     }
+    public Long getInventoryId() {
+        return InventoryId;
+    }
+
+    public void setInventoryId(Long inventoryId) {
+        InventoryId = inventoryId;
+    }
+
 }
