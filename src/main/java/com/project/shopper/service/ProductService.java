@@ -1,12 +1,11 @@
 package com.project.shopper.service;
 
-import com.project.shopper.model.Inventory;
-import com.project.shopper.model.InventoryLog;
-import com.project.shopper.model.InventoryReq;
-import com.project.shopper.model.Product;
+import com.project.shopper.model.*;
 import com.project.shopper.repository.InventoryLogRepository;
 import com.project.shopper.repository.InventoryRepository;
 import com.project.shopper.repository.ProductRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +31,18 @@ public class ProductService {
         return productRepository.findAll();
     }
 
-    public Product createProduct(Product product) {
-//        categoryRepository.save(product.getProdCategory());
-        return productRepository.save(product);
+    public ResponseEntity<Product> createProduct(Product product) {
+        ResponseEntity<Product> response = new ResponseEntity<>();
+        if (productRepository.findProductByName(product.getName()) != null) {
+            response.setError("Product with that name already exist");
+            return response;
+        }
+        try {
+            response.setPayload(productRepository.save(product));
+        }catch(Exception e){
+            response.setError("Error: "+ e);
+        }
+        return response;
     }
 
     public boolean checkProductInventoryExists(Long productID) {
@@ -46,49 +54,78 @@ public class ProductService {
         return productEnt.orElse(null);
     }
 
-    public Inventory addToInventory(InventoryReq inventoryReq) {
+    public ResponseEntity<Inventory> addToInventory(InventoryReq inventoryReq) {
+        ResponseEntity<Inventory> response = new ResponseEntity<>();
         Product product = checkProductExist(inventoryReq.getProductId());
         if (product != null) {
             if (checkProductInventoryExists(product.getProductId())) {
                 if (inventoryReq.getStock() <= 0) {
-                    return null;
+                    response.setError("Inventory stock is negative");
+                    return response;
                 }
                 Inventory inventory = new Inventory(product, inventoryReq.getStock());
-                inventory = inventoryRepository.save(inventory);
-                inventoryReq.setInventoryId(inventory.getInventoryID());
-                return inventory;
+                response.setPayload(inventoryRepository.save(inventory));
+                inventoryReq.setInventoryId(response.getPayload().getInventoryID());
+                return response;
             }
+            response.setError("Inventory for product already exist");
+            return response;
         }
-        return null;
+        response.setError("Product does not exist");
+        return response;
     }
 
-    public List<Inventory> getAllInventory() {
-        return inventoryRepository.findAll();
+    public ResponseEntity<List<Inventory>> getAllInventory() {
+        ResponseEntity<List<Inventory>> response = new ResponseEntity<>();
+        try {
+            response.setPayload(inventoryRepository.findAll());
+        }catch(Exception e){
+            response.setError("Error: "+e);
+        }
+        return response;
     }
 
-    public Inventory getInventoryForProduct(Long prodId) {
+    public ResponseEntity<Inventory> getInventoryForProduct(Long prodId) {
         Optional<Product> product = productRepository.findById(prodId);
-        if (product.isPresent()) {
-            return inventoryRepository.findProductExist(prodId);
-        } else {
-            return null;
+        ResponseEntity<Inventory> response = new ResponseEntity<>();
+        if(product.isPresent()) {
+            try {
+                Inventory inventory = inventoryRepository.findProductExist(prodId);
+                if(inventory==null){
+                    response.setError("Inventory for the product does not exist");
+                    return response;
+                }
+                response.setPayload(inventory);
+                return response;
+            }catch(Exception e){
+                response.setError("Error: "+ e.getMessage());
+            }
+            return response;
         }
+            response.setError("Product does not exist");
+            return response;
     }
 
-    public Inventory updateInventory(InventoryReq inventoryReq) {
+    public ResponseEntity<Inventory> updateInventory(InventoryReq inventoryReq) {
+        ResponseEntity<Inventory> response = new ResponseEntity<>();
         Product product = checkProductExist(inventoryReq.getProductId());
         if (product != null) {
             if (!checkProductInventoryExists(product.getProductId())) {
                 if (inventoryReq.getStock() <= 0) {
-                    return null;
+                    response.setError("Inventory stock is negative");
+                    return response;
                 }
                 Inventory inventory = inventoryRepository.findProductExist(product.getProductId());
                 inventory.setQuantity(inventoryReq.getStock());
                 inventoryReq.setInventoryId(inventory.getInventoryID());
-                return inventoryRepository.save(inventory);
+                response.setPayload(inventoryRepository.save(inventory));
+                return response;
             }
+            response.setError("Inventory for the product does not exist");
+            return response;
         }
-        return null;
+        response.setError("Product does not exist");
+        return response;
     }
 
 }
